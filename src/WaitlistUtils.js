@@ -1,5 +1,6 @@
 const axios = require('axios');
 const { getBatchPatient } = require('./PatientUtils');
+const {transformAppointments, getAllAppointments} = require("./AppointUtils");
 
 const getWaitlist = async (token, practiceid,departmentid) => {
   if (!token || !practiceid) {
@@ -39,6 +40,81 @@ const getWaitlist = async (token, practiceid,departmentid) => {
     throw error;
   }
 };
+
+
+
+/**
+ * Enhances waitlist entries for a specific department with appointment information
+ * @param {Array} waitlistData - Array of waitlist entries
+ * @param {string} token - Authentication token
+ * @param {string} practiceId - Practice ID
+ * @param {number} targetDepartmentId - Department ID to filter for
+ * @returns {Promise<Array>} Enhanced waitlist entries for the specified department
+ */
+async function enhanceWaitlistWithAppointments(waitlistData, token, practiceId, targetDepartmentId) {
+  if (!Array.isArray(waitlistData)) {
+    throw new Error('waitlistData must be an array');
+  }
+
+  try {
+    // Filter for only the target department entries
+    const departmentEntries = waitlistData.filter(entry => entry.departmentid === targetDepartmentId);
+
+    // Group by providerId for efficient API calls
+    const groupedByProvider = _.groupBy(departmentEntries, 'providerid');
+    const enhancedEntries = [];
+
+    const today = new Date();
+    const thirtyDaysFromNow = new Date(today);
+    thirtyDaysFromNow.setDate(today.getDate() + 30);
+
+    // Process each provider group
+    for (const [providerId, entries] of Object.entries(groupedByProvider)) {
+      try {
+        // Get appointments for this provider
+        const appointments = await getAllAppointments(
+          token,
+          practiceId,
+          today.toISOString(),
+          thirtyDaysFromNow.toISOString(),
+          providerId !== 'undefined' ? parseInt(providerId) : undefined,
+          targetDepartmentId
+        );
+
+        // Transform the appointments
+        const transformedAppointments = await transformAppointments(
+          appointments,
+          practiceId,
+          token
+        );
+
+        // Enhance each entry with appointment data
+        entries.forEach(entry => {
+          const enhancedEntry = {
+            ...entry,
+            relatedAppointments: transformedAppointments.filter(appt =>
+              appt.patientid === entry.patientid
+            ),
+            patientPhone: transformedAppointments[0]?.patientPhone || null,
+            providerName: transformedAppointments[0]?.providerName || null
+          };
+          enhancedEntries.push(enhancedEntry);
+        });
+      } catch (error) {
+        console.error(`Failed to process entries for provider ${providerId}:`, error);
+      }
+    }
+
+    return enhancedEntries;
+  } catch (error) {
+    console.error('Error enhancing waitlist data:', error);
+    throw error;
+  }
+}
+
+
+
+
 
 module.exports = {
   getWaitlist

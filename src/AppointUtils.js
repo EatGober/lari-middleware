@@ -184,38 +184,51 @@ const filterAppointmentsByEndTime = (appointments, endTime) => {
  * @returns {Promise<*>}
  */
 
-const cancelAppointment = async (token, practiceid, appointmentid,patientid,reason) => {
+const cancelAppointment = async (token, practiceid, appointmentid, patientid, reason) => {
   if (!token || !practiceid || !appointmentid || !patientid) {
     throw new Error('Token, practiceid, appointmentId, and patientid are required');
   }
 
-
   try {
-    const params = {
-      appointmentid: appointmentid,
-      patientid: patientid,
-      practiceid: practiceid,
-    };
+    const requestBody = new URLSearchParams();
+    requestBody.append('patientid', patientid);
     if (reason) {
-      params.reason = reason;
+      requestBody.append('cancellationreason', reason);
     }
+    // Add optional parameters with default values
+    requestBody.append('ignoreschedulablepermission', 'true');
+    requestBody.append('nopatientcase', 'false');
+
     const response = await axios({
-      method: 'put',
+      method: 'PUT',
       url: `https://api.preview.platform.athenahealth.com/v1/${practiceid}/appointments/${appointmentid}/cancel`,
-      params: params,
       headers: {
         'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/x-www-form-urlencoded',
         'Accept': 'application/json'
-      }
+      },
+      data: requestBody
     });
-    return response.data.status;
+
+    console.log('Cancel request details:', {
+      url: response.config.url,
+      headers: response.config.headers,
+      data: response.config.data,
+      response: response.data
+    });
+
+    return response.data;
   } catch (error) {
     console.error(`Failed to cancel appointment ${appointmentid}:`, {
       status: error.response?.status,
-      message: error.message
+      statusText: error.response?.statusText,
+      data: error.response?.data,
+      message: error.message,
+      requestData: error.config?.data
     });
+    throw error;
   }
-}
+};
 
 
 
@@ -348,4 +361,5 @@ const filterNullNums = (transformedAppt)=>{
 
 
 
-module.exports = { getAllAppointments, filterAppointmentsByDuration, filterAppointmentsByEndTime, filterAppointmentsByStartTime, transformAppointments, cancelAppointment,filterNullNums };
+
+module.exports = { getAllAppointments, filterAppointmentsByDuration, getSubscriptions, subscribeToChanges, filterAppointmentsByEndTime, filterAppointmentsByStartTime, transformAppointments, cancelAppointment,filterNullNums };
