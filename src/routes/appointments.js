@@ -59,7 +59,7 @@ router.get('/:practiceid', asyncHandler(async (req, res) => {
   }
 
   const transformedAppointments = await Promise.all(
-    await transformAppointments(appointments)
+    await transformAppointments(appointments, practiceid, req.athenaToken)
   );
 
   res.json(transformedAppointments);

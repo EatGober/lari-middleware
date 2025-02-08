@@ -39,15 +39,48 @@ async function getPatient(token, practiceid, patientid) {
   }
 }
 
-const getPhone = async ( practiceid, patientid) => {
+/**
+ * Returns a batch of patient records from athenahealth as an array
+ * @param token - String
+ * @param practiceid - practice id
+ * @param patientids - Comma seperated string of patient ids
+ * @returns {Promise<Array>} Array of patient objects
+ */
 
+async function getBatchPatients(token, practiceid, patientids) {
+  if (!token || !practiceid || !patientids) {
+    throw new Error('Token, practiceid, patientids are required');
+  }
+  try {
+    const response = await axios({
+      method: 'GET',
+      url: `https://api.preview.platform.athenahealth.com/v1/${practiceid}/patients/batch`,
+      params: {
+        practiceid: practiceid,
+        patientids: patientids,
+      },
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/json'
+      }
+    });
+
+    return response.data || [];
+  }catch (error) {
+    console.error('Failed to retrieve patients:', {
+      status: error.response?.status,
+      message: error.message
+    });
+    throw error;
+  }
+}
+
+
+const getPhone = async (token, practiceid, patientid) => {
 
   try {
 
-    const token = await getAthenaToken({
-      clientId: process.env.CLIENT_ID,
-      clientSecret: process.env.CLIENT_SECRET
-    })
+    
     const response = await getPatient(token, practiceid, patientid);
 
 

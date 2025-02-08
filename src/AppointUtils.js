@@ -242,9 +242,12 @@ const getSubscriptions = async (practiceid, bearerToken) => {
 /**
  * Transforms full appointment objects into a streamlined format
  * @param {Array} appointments - Array of full appointment objects
+ * @param practiceid - ID of practice
+ * @param token - String
  * @returns {Array} Array of streamlined appointment objects
+ *
  */
-const transformAppointments = async (appointments) => {
+const transformAppointments = async (appointments,practiceid, token) => {
   if (!Array.isArray(appointments)) {
     throw new Error('Input must be an array of appointments');
   }
@@ -261,9 +264,9 @@ const transformAppointments = async (appointments) => {
     const patientId = parseInt(appointment.patientid, 10);
     const departmentId = parseInt(appointment.departmentid, 10);
     const providerId = parseInt(appointment.providerid, 10);
-    console.log("appointment.practiceid", appointment.practiceid);
-    console.log("appointment.patientid", appointment.patientid);
-    const patientPhone = await getPhone(appointment.practiceid, appointment.patientid);
+    console.log("TransformAppt - practiceid", practiceid);
+    console.log("TransformAppt - patientid", appointment.patientid);
+    const patientPhone = await getPhone(token, practiceid, appointment.patientid);
     console.log("patientPhone", patientPhone);
 
     // Validate ID conversions
