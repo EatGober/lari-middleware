@@ -6,7 +6,7 @@ const { authMiddleware } = require('../middleware/auth');
 const { getWaitlist } = require('../WaitlistUtils');
 
 // Apply auth middleware to all waitlist routes
-router.use(authMiddleware);
+// router.use(authMiddleware);
 
 // Get waitlist entries with optional provider filtering
 router.get('/:practiceid', asyncHandler(async (req, res) => {
