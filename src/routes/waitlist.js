@@ -6,23 +6,29 @@ const { authMiddleware } = require('../middleware/auth');
 const { getWaitlist } = require('../WaitlistUtils');
 
 // Apply auth middleware to all waitlist routes
-// router.use(authMiddleware);
+router.use(authMiddleware);
 
 // Get waitlist entries with optional provider filtering
 router.get('/:practiceid', asyncHandler(async (req, res) => {
   const { practiceid } = req.params;
-  const { providerid } = req.query;
+  const { providerid, departmentid } = req.query;
 
   try {
     const waitlistEntries = await getWaitlist(
       req.athenaToken,
       practiceid,
-      providerid ? providerid.toString() : undefined
-    );
+      providerid ? providerid.toString() : undefined,
+    departmentid ? departmentid.toString() : undefined
+
+  );
+
+    console.log('Waitlist Response:', waitlistEntries); // Add this log
+
+    // The API might return the data in a different structure
+    // Maybe it's waitlistEntries.waitlist or waitlistEntries.items
 
     res.json(waitlistEntries);
   } catch (error) {
-    // Handle specific API errors
     if (error.response?.status === 404) {
       res.status(404).json({ error: 'No waitlist found for the specified practice' });
     } else if (error.response?.status === 401) {
@@ -32,6 +38,8 @@ router.get('/:practiceid', asyncHandler(async (req, res) => {
       throw error;
     }
   }
+
 }));
+
 
 module.exports = router;
