@@ -297,6 +297,21 @@ const transformAppointments = async (appointments, practiceid, token) => {
     throw error;
   }
 };
+/**
+ *
+ * @param transformedAppt - an array of tranfoormed appt objects
+ */
+const filterNullNums = (transformedAppt)=>{
+  if (!Array.isArray(transformedAppt)) {
+    throw new Error('Input must be an array of appointments');
+  }
+  let numOnly = []
+  transformedAppt.forEach( (appt) =>{
+    if (appt.patientPhone != null){
+      numOnly.push(appt)
+    }
+  })
+  return numOnly;
+};
 
-
-module.exports = { getAllAppointments, filterAppointmentsByDuration, filterAppointmentsByEndTime, filterAppointmentsByStartTime, transformAppointments, cancelAppointment };
+module.exports = { getAllAppointments, filterAppointmentsByDuration, filterAppointmentsByEndTime, filterAppointmentsByStartTime, transformAppointments, cancelAppointment,filterNullNums };

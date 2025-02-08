@@ -8,7 +8,7 @@ const {
   filterAppointmentsByDuration,
   filterAppointmentsByEndTime,
   filterAppointmentsByStartTime,
-  transformAppointments
+  transformAppointments, filterNullNums
 } = require('../AppointUtils');
 
 // Apply auth middleware to all appointment routes
@@ -62,7 +62,10 @@ router.get('/:practiceid', asyncHandler(async (req, res) => {
     await transformAppointments(appointments, practiceid, req.athenaToken)
   );
 
-  res.json(transformedAppointments);
+  const filteredAppts = filterNullNums(transformedAppointments)
+  res.json(filteredAppts);
 }));
+
+
 
 module.exports = router;
