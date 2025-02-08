@@ -1,5 +1,5 @@
 const axios = require('axios');
-const {getPhone} = require('./PatientUtils')
+const {getPhones} = require('./PatientUtils')
 
 /**
  * Retrieves appointments for the given date range and provider
@@ -242,54 +242,61 @@ const getSubscriptions = async (practiceid, bearerToken) => {
 /**
  * Transforms full appointment objects into a streamlined format
  * @param {Array} appointments - Array of full appointment objects
- * @param practiceid - ID of practice
- * @param token - String
- * @returns {Array} Array of streamlined appointment objects
- *
+ * @param {string} practiceid - ID of practice
+ * @param {string} token - Authentication token
+ * @returns {Promise<Array>} Array of streamlined appointment objects
  */
-const transformAppointments = async (appointments,practiceid, token) => {
+const transformAppointments = async (appointments, practiceid, token) => {
   if (!Array.isArray(appointments)) {
     throw new Error('Input must be an array of appointments');
   }
 
-  return appointments.map(async appointment => {
-    // Ensure all required fields exist
-    if (!appointment.appointmentid || !appointment.patientid ||
-      !appointment.departmentid || !appointment.providerid) {
-      throw new Error('Missing required appointment fields');
-    }
+  try {
+    // Extract unique patient IDs
+    const patientIds = [...new Set(appointments
+      .filter(appt => appt.patientid)
+      .map(appt => parseInt(appt.patientid, 10)))];
 
-    // Convert ID fields to integers
-    const appointmentId = parseInt(appointment.appointmentid, 10);
-    const patientId = parseInt(appointment.patientid, 10);
-    const departmentId = parseInt(appointment.departmentid, 10);
-    const providerId = parseInt(appointment.providerid, 10);
-    console.log("TransformAppt - practiceid", practiceid);
-    console.log("TransformAppt - patientid", appointment.patientid);
-    const patientPhone = await getPhone(token, practiceid, appointment.patientid);
-    console.log("patientPhone", patientPhone);
+    // Get all phone numbers in one batch call using just the patient IDs
+    const phoneNumbersByPatientId = await getPhones(token, practiceid, patientIds);
 
-    // Validate ID conversions
-    if (isNaN(appointmentId) || isNaN(patientId) ||
-      isNaN(departmentId) || isNaN(providerId)) {
-      throw new Error('Invalid ID format in appointment data');
-    }
+    // Process all appointments
+    return appointments.map(appointment => {
+      // Ensure all required fields exist
+      if (!appointment.appointmentid || !appointment.patientid ||
+        !appointment.departmentid || !appointment.providerid) {
+        throw new Error('Missing required appointment fields');
+      }
 
-    // TODO: Implementation note - patientPhone and providerName would need to be
-    // retrieved from additional API calls or data sources as they're not in the
-    // original appointment object
+      // Convert ID fields to integers
+      const appointmentId = parseInt(appointment.appointmentid, 10);
+      const patientid = parseInt(appointment.patientid, 10);
+      const departmentId = parseInt(appointment.departmentid, 10);
+      const providerId = parseInt(appointment.providerid, 10);
 
-    return {
-      appointmentid: appointmentId,
-      patientid: patientId,
-      departmentid: departmentId,
-      providerid: providerId,
-      patientPhone: patientPhone, // Dummy phone number
-      providerName: "Dr. Smith", // Dummy provider name
-      scheduledDateTimeString: appointment.scheduleddatetime || null,
-      duration: parseInt(appointment.duration, 10) || 0
-    };
-  });
-}
+      // Validate ID conversions
+      if (isNaN(appointmentId) || isNaN(patientid) ||
+        isNaN(departmentId) || isNaN(providerId)) {
+        throw new Error('Invalid ID format in appointment data');
+      }
+
+      return {
+        appointmentid: appointmentId,
+        patientid: patientid,
+        departmentid: departmentId,
+        providerid: providerId,
+        patientPhone: phoneNumbersByPatientId[patientid] || null,
+        providerName: "Dr. Smith", // Dummy provider name
+        scheduledDateTimeString: appointment.scheduleddatetime || null,
+        duration: parseInt(appointment.duration, 10) || 0
+      };
+    });
+
+  } catch (error) {
+    console.error('Error transforming appointments:', error);
+    throw error;
+  }
+};
+
 
 module.exports = { getAllAppointments, filterAppointmentsByDuration, filterAppointmentsByEndTime, filterAppointmentsByStartTime, transformAppointments, cancelAppointment };
