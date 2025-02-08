@@ -11,14 +11,15 @@ const app = express();
 // Basic middleware
 app.use(cors());
 app.use(express.json());
-app.use('/api', authMiddleware);
+// app.use('/api', authMiddleware);
 
 
 // Mount routes
 app.use('/api', routes);
 
 // Start server
+// Start server
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server running on port ${PORT} and accessible from any IP`);
 });
