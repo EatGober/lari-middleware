@@ -9,7 +9,7 @@ This API provides endpoints for managing and retrieving appointments. All routes
 ```
 
 ## Authentication
-All endpoints require a valid authentication token. The token should be included in the request headers.
+lowk rn there is none lol
 
 ## Endpoints
 
