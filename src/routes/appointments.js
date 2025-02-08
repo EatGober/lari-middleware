@@ -15,7 +15,7 @@ const {
 router.use(authMiddleware);
 
 // Get appointments with optional filtering
-router.get('/:practiceId', asyncHandler(async (req, res) => {
+router.get('/:practiceid', asyncHandler(async (req, res) => {
   const {
     startDate,
     endDate,
@@ -26,10 +26,11 @@ router.get('/:practiceId', asyncHandler(async (req, res) => {
     endTime
   } = req.query;
 
+  const { practiceid } = req.params;
 
   let appointments = await getAllAppointments(
     req.athenaToken,
-    practiceId,
+    practiceid,
     startDate,
     endDate,
     providerId ? providerId.toString() : undefined,
@@ -57,7 +58,11 @@ router.get('/:practiceId', asyncHandler(async (req, res) => {
     );
   }
 
-  res.json(transformAppointments(appointments));
+  const transformedAppointments = await Promise.all(
+    await transformAppointments(appointments)
+  );
+
+  res.json(transformedAppointments);
 }));
 
 module.exports = router;

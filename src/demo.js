@@ -10,7 +10,7 @@ async function demo() {
     });
     console.log('Successfully obtained token');
 
-    const practiceId = process.env.PRACTICE_ID;
+    const practiceid = process.env.PRACTICE_ID;
     const providerId = process.env.PROVIDER_ID;
 
     const d = new Date();
@@ -28,14 +28,14 @@ async function demo() {
       day: '2-digit'
     });
     console.log(`Fetching appointments from ${startDate} to ${endDate}`);
-    console.log(`Practice ID: ${practiceId}`);
+    console.log(`Practice ID: ${practiceid}`);
     console.log(`Provider ID: ${providerId}`);
 
 
 
     const appointments = await getAllAppointments(
       token,
-      practiceId,
+      practiceid,
       startDate,
       endDate,
       providerId

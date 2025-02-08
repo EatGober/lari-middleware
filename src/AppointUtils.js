@@ -1,19 +1,20 @@
 const axios = require('axios');
+const {getPhone} = require('./PatientUtils')
 
 /**
  * Retrieves appointments for the given date range and provider
  * @param {string} token - OAuth token
- * @param {string} practiceId - Practice ID
+ * @param {string} practiceid - Practice ID
  * @param {string} startDate - Start date (MM/DD/YYYY)
  * @param {string} endDate - End date (MM/DD/YYYY)
  * @param {number} providerId - Provider ID
  * @param {number} departmentId - Department ID
  * @returns {Promise<Array>} Array of appointments
  */
-async function getAllAppointments(token, practiceId, startDate, endDate, providerId, departmentId) {
+async function getAllAppointments(token, practiceid, startDate, endDate, providerId, departmentId) {
 
-  if (!token || !practiceId || !startDate || !endDate ) {
-    throw new Error('Token, practiceId, startDate, and endDate are required');
+  if (!token || !practiceid || !startDate || !endDate ) {
+    throw new Error('Token, practiceid, startDate, and endDate are required');
   }
 
   if (!providerId && !departmentId) {
@@ -37,7 +38,7 @@ async function getAllAppointments(token, practiceId, startDate, endDate, provide
 
     const response = await axios({
       method: 'GET',
-      url: `https://api.preview.platform.athenahealth.com/v1/${practiceId}/appointments/booked`,
+      url: `https://api.preview.platform.athenahealth.com/v1/${practiceid}/appointments/booked`,
       params: params,
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -154,7 +155,7 @@ const filterAppointmentsByEndTime = (appointments, endTime) => {
 
 const cancelAppointment = async (token, practiceid, appointmentid,patientid,reason) => {
   if (!token || !practiceid || !appointmentid || !patientid) {
-    throw new Error('Token, practiceId, appointmentId, and patientid are required');
+    throw new Error('Token, practiceid, appointmentId, and patientid are required');
   }
 
 
@@ -162,7 +163,7 @@ const cancelAppointment = async (token, practiceid, appointmentid,patientid,reas
     const params = {
       appointmentid: appointmentid,
       patientid: patientid,
-      practiceId: practiceid,
+      practiceid: practiceid,
     };
     if (reason) {
       params.reason = reason;
@@ -189,18 +190,18 @@ const cancelAppointment = async (token, practiceid, appointmentid,patientid,reas
 
 /**
  * Subscribes to appointment change events
- * @param {number} practiceId - Practice ID
+ * @param {number} practiceid - Practice ID
  * @param {string} bearerToken - Auth token
  * @param {string} [eventName] - Optional specific event to subscribe to
  * @returns {Promise} Subscription response
  */
-const subscribeToChanges = async (practiceId, bearerToken, eventName) => {
+const subscribeToChanges = async (practiceid, bearerToken, eventName) => {
   const formData = new URLSearchParams();
 
   if(eventName) formData.append('eventname', eventName);
 
   const response = await fetch(
-    `https://api.preview.platform.athenahealth.com/v1/${practiceId}/appointments/changed/subscription`,
+    `https://api.preview.platform.athenahealth.com/v1/${practiceid}/appointments/changed/subscription`,
     {
       method: 'POST',
       headers: {
@@ -217,13 +218,13 @@ const subscribeToChanges = async (practiceId, bearerToken, eventName) => {
 
 /**
  * Get current appointment change subscriptions
- * @param {number} practiceId
+ * @param {number} practiceid
  * @param {string} bearerToken
  * @returns {Promise} Current subscriptions and their status
  */
-const getSubscriptions = async (practiceId, bearerToken) => {
+const getSubscriptions = async (practiceid, bearerToken) => {
   const response = await fetch(
-    `https://api.preview.platform.athenahealth.com/v1/${practiceId}/appointments/changed/subscription`,
+    `https://api.preview.platform.athenahealth.com/v1/${practiceid}/appointments/changed/subscription`,
     {
       headers: {
         'Authorization': `Bearer ${bearerToken}`
@@ -243,12 +244,12 @@ const getSubscriptions = async (practiceId, bearerToken) => {
  * @param {Array} appointments - Array of full appointment objects
  * @returns {Array} Array of streamlined appointment objects
  */
-const transformAppointments= (appointments) => {
+const transformAppointments = async (appointments) => {
   if (!Array.isArray(appointments)) {
     throw new Error('Input must be an array of appointments');
   }
 
-  return appointments.map(appointment => {
+  return appointments.map(async appointment => {
     // Ensure all required fields exist
     if (!appointment.appointmentid || !appointment.patientid ||
       !appointment.departmentid || !appointment.providerid) {
@@ -260,6 +261,10 @@ const transformAppointments= (appointments) => {
     const patientId = parseInt(appointment.patientid, 10);
     const departmentId = parseInt(appointment.departmentid, 10);
     const providerId = parseInt(appointment.providerid, 10);
+    console.log("appointment.practiceid", appointment.practiceid);
+    console.log("appointment.patientid", appointment.patientid);
+    const patientPhone = await getPhone(appointment.practiceid, appointment.patientid);
+    console.log("patientPhone", patientPhone);
 
     // Validate ID conversions
     if (isNaN(appointmentId) || isNaN(patientId) ||
@@ -276,7 +281,7 @@ const transformAppointments= (appointments) => {
       patientid: patientId,
       departmentid: departmentId,
       providerid: providerId,
-      patientPhone: "555-0123", // Dummy phone number
+      patientPhone: patientPhone, // Dummy phone number
       providerName: "Dr. Smith", // Dummy provider name
       scheduledDateTimeString: appointment.scheduleddatetime || null,
       duration: parseInt(appointment.duration, 10) || 0
