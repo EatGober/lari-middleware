@@ -21,7 +21,9 @@ const authMiddleware = async (req, res, next) => {
     }
     next();
   } catch (error) {
-    res.status(500).json({ error: 'Authentication failed' });
+    // Instead of blocking with error response, just continue without token
+    console.error('Failed to get Athena token:', error);
+    next();
   }
 };
 
