@@ -8,11 +8,14 @@ const router = express.Router();
 const appointmentRoutes = require('./appointments');
 const calendarRoutes = require('./calendar');
 const providerRoutes = require('./providers');
+const waitlistRoutes = require('./waitlist');
 
 // Route map
 router.use('/appointments', appointmentRoutes);
 router.use('/calendar', calendarRoutes);
 router.use('/providers', providerRoutes);
+router.use('/waitlist', waitlistRoutes);
+
 
 // Health check
 router.get('/health', (req, res) => {
