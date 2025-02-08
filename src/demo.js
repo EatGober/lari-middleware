@@ -1,8 +1,8 @@
 require('dotenv').config();
 const { getAthenaToken } = require("./AuthUtils");
-const { getAllAppointments, filterAppointmentsByStartTime } = require("./AppointUtils");
+const { getAllAppointments, transformAppointments} = require("./AppointUtils");
 
-async function main() {
+async function demo() {
   try {
     const token = await getAthenaToken({
       clientId: process.env.CLIENT_ID,
@@ -51,6 +51,14 @@ async function main() {
 
     console.log(`Found ${appointments.length} appointments`);
     console.log('First appointment:', JSON.stringify(appointments[0], null, 2));
+    try {
+      const transformedAppointments = transformAppointments(appointments);
+      console.log('\nTransformed appointments format:');
+      console.log(JSON.stringify(transformedAppointments[0], null, 2));
+      console.log(`Successfully transformed ${transformedAppointments.length} appointments`);
+    } catch (transformError) {
+      console.error('Error transforming appointments:', transformError.message);
+    }
 
   } catch (error) {
     console.error('Error:', error.message);
@@ -63,4 +71,4 @@ async function main() {
   }
 }
 
-main();
+demo();

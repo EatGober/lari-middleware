@@ -192,8 +192,6 @@ const cancelAppointment = async (token, practiceid, appointmentid,patientid,reas
  * @param {number} practiceId - Practice ID
  * @param {string} bearerToken - Auth token
  * @param {string} [eventName] - Optional specific event to subscribe to
- * @param {boolean} [includeReminderCall] - Include reminder call events
- * @param {boolean} [includeSuggestedOverbooking] - Include overbooking events
  * @returns {Promise} Subscription response
  */
 const subscribeToChanges = async (practiceId, bearerToken, eventName) => {
@@ -237,4 +235,53 @@ const getSubscriptions = async (practiceId, bearerToken) => {
   return response.json();
 };
 
-module.exports = { getAllAppointments, filterAppointmentsByDuration, filterAppointmentsByEndTime, filterAppointmentsByStartTime };
+
+
+
+/**
+ * Transforms full appointment objects into a streamlined format
+ * @param {Array} appointments - Array of full appointment objects
+ * @returns {Array} Array of streamlined appointment objects
+ */
+const transformAppointments= (appointments) => {
+  if (!Array.isArray(appointments)) {
+    throw new Error('Input must be an array of appointments');
+  }
+
+  return appointments.map(appointment => {
+    // Ensure all required fields exist
+    if (!appointment.appointmentid || !appointment.patientid ||
+      !appointment.departmentid || !appointment.providerid) {
+      throw new Error('Missing required appointment fields');
+    }
+
+    // Convert ID fields to integers
+    const appointmentId = parseInt(appointment.appointmentid, 10);
+    const patientId = parseInt(appointment.patientid, 10);
+    const departmentId = parseInt(appointment.departmentid, 10);
+    const providerId = parseInt(appointment.providerid, 10);
+
+    // Validate ID conversions
+    if (isNaN(appointmentId) || isNaN(patientId) ||
+      isNaN(departmentId) || isNaN(providerId)) {
+      throw new Error('Invalid ID format in appointment data');
+    }
+
+    // TODO: Implementation note - patientPhone and providerName would need to be
+    // retrieved from additional API calls or data sources as they're not in the
+    // original appointment object
+
+    return {
+      appointmentid: appointmentId,
+      patientid: patientId,
+      departmentid: departmentId,
+      providerid: providerId,
+      patientPhone: "555-0123", // Dummy phone number
+      providerName: "Dr. Smith", // Dummy provider name
+      scheduledDateTimeString: appointment.scheduleddatetime || null,
+      duration: parseInt(appointment.duration, 10) || 0
+    };
+  });
+}
+
+module.exports = { getAllAppointments, filterAppointmentsByDuration, filterAppointmentsByEndTime, filterAppointmentsByStartTime, transformAppointments, cancelAppointment };
