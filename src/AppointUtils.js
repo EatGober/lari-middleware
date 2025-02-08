@@ -5,8 +5,8 @@ const {getPhones} = require('./PatientUtils')
  * Retrieves appointments for the given date range and provider
  * @param {string} token - OAuth token thing
  * @param {string} practiceid - Practice ID
- * @param {string} startDate - Start date (MM/DD/YYYY)
- * @param {string} endDate - End date (MM/DD/YYYY)
+ * @param {string} startDate - Start date ISO Date string
+ * @param {string} endDate - End date ISO Date string
  * @param {number} providerId - Provider ID
  * @param {number} departmentId - Department ID
  * @returns {Promise<Array>} Array of appointments
@@ -23,8 +23,8 @@ async function getAllAppointments(token, practiceid, startDate, endDate, provide
 
   try {
     const params = {
-      startdate: startDate,
-      enddate: endDate,
+      startdate: convertISOToDate(startDate),
+      enddate: convertISOToDate(endDate),
       limit: 1000
     };
 
@@ -76,7 +76,38 @@ const parseDateTime = (dateTimeString) => {
     parseInt(seconds)
   );
 };
+/**
+ * Converts Date object to mm/dd/yyyy hh24:mi:ss string format
+ * @param {Date} dateObj - Date object to convert
+ * @returns {string} Formatted date string in "mm/dd/yyyy hh24:mi:ss" format
+ */
+const formatDumbDateTime = (dateObj) => {
+  const month = String(dateObj.getMonth() + 1).padStart(2, '0'); // Add 1 since months are 0-based
+  const day = String(dateObj.getDate()).padStart(2, '0');
+  const year = dateObj.getFullYear();
 
+  const hours = String(dateObj.getHours()).padStart(2, '0');
+  const minutes = String(dateObj.getMinutes()).padStart(2, '0');
+  const seconds = String(dateObj.getSeconds()).padStart(2, '0');
+
+  return `${month}/${day}/${year} ${hours}:${minutes}:${seconds}`;
+};
+
+/**
+ * Converts an ISO date string to mm/dd/yyyy string format
+ * @param {string} isoDateString - ISO date string (e.g., "2023-10-15T14:48:00.000Z")
+ * @returns {string} Formatted date string in "mm/dd/yyyy" format
+ */
+function convertISOToDate(isoDateString) {
+  const date = new Date(isoDateString);
+
+  // Use UTC methods to avoid timezone issues
+  const month = String(date.getUTCMonth() + 1).padStart(2, '0'); // Add 1 since months are 0-based
+  const day = String(date.getUTCDate()).padStart(2, '0');
+  const year = date.getUTCFullYear();
+
+  return `${month}/${day}/${year}`;
+}
 
 /**
  * Filters an array of appointment objects by maximum duration
@@ -114,7 +145,7 @@ const filterAppointmentsByStartTime = (appointments, startTime) => {
   }
 
   return appointments.filter(appointment => {
-    const scheduledDateTime = parseDateTime(appointment.scheduledDateTimeString);
+    const scheduledDateTime = parseDateTime(appointment.scheduleddatetime);
     return scheduledDateTime >= startTime;
   });
 };
@@ -136,7 +167,7 @@ const filterAppointmentsByEndTime = (appointments, endTime) => {
   }
 
   return appointments.filter(appointment => {
-    const scheduledDateTime = parseDateTime(appointment.scheduledDateTimeString);
+    const scheduledDateTime = parseDateTime(appointment.scheduleddatetime);
     return scheduledDateTime <= endTime;
   });
 };
@@ -273,6 +304,7 @@ const transformAppointments = async (appointments, practiceid, token) => {
       const patientid = parseInt(appointment.patientid, 10);
       const departmentId = parseInt(appointment.departmentid, 10);
       const providerId = parseInt(appointment.providerid, 10);
+      const scheduledDateTimeString = parseDateTime(appointment.scheduleddatetime)
 
       // Validate ID conversions
       if (isNaN(appointmentId) || isNaN(patientid) ||
@@ -287,7 +319,7 @@ const transformAppointments = async (appointments, practiceid, token) => {
         providerid: providerId,
         patientPhone: phoneNumbersByPatientId[patientid] || null,
         providerName: "Dr. Smith", // Dummy provider name
-        scheduledDateTimeString: appointment.scheduleddatetime || null,
+        scheduledDateTimeString: scheduledDateTimeString || null,
         duration: parseInt(appointment.duration, 10) || 0
       };
     });
@@ -313,5 +345,7 @@ const filterNullNums = (transformedAppt)=>{
   })
   return numOnly;
 };
+
+
 
 module.exports = { getAllAppointments, filterAppointmentsByDuration, filterAppointmentsByEndTime, filterAppointmentsByStartTime, transformAppointments, cancelAppointment,filterNullNums };
