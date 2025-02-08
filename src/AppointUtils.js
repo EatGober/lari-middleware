@@ -3,7 +3,7 @@ const {getPhone} = require('./PatientUtils')
 
 /**
  * Retrieves appointments for the given date range and provider
- * @param {string} token - OAuth token
+ * @param {string} token - OAuth token thing
  * @param {string} practiceid - Practice ID
  * @param {string} startDate - Start date (MM/DD/YYYY)
  * @param {string} endDate - End date (MM/DD/YYYY)
