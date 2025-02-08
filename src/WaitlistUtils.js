@@ -1,7 +1,7 @@
 const axios = require('axios');
 const { getBatchPatient } = require('./PatientUtils');
 
-const getWaitlist = async (token, practiceid, providerid) => {
+const getWaitlist = async (token, practiceid,departmentid) => {
   if (!token || !practiceid) {
     throw new Error("token and practice id are required for getWaitlist");
   }
@@ -10,8 +10,9 @@ const getWaitlist = async (token, practiceid, providerid) => {
     const params = {
       practiceid: practiceid
     };
-    if (providerid) {
-      params.providerid = providerid;
+
+    if (departmentid) {
+      params.providerid = departmentid;
     }
 
     const response = await axios({
@@ -24,7 +25,12 @@ const getWaitlist = async (token, practiceid, providerid) => {
       }
     });
 
-    return response.data;
+    // Add logging to see the structure
+    console.log('Waitlist response structure:', JSON.stringify(response.data, null, 2));
+
+    // Return the waitlist array, similar to how appointments are handled
+    return response.data.waitlistentries || response.data.results || [];
+
   } catch (error) {
     console.error('Failed to retrieve waitlist appts:', {
       status: error.response?.status,
