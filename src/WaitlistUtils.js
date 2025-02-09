@@ -10,12 +10,12 @@ const getWaitlist = async (token, practiceid,departmentid) => {
 
   try {
     const params = {
-      practiceid: practiceid
     };
 
     if (departmentid) {
-      params.providerid = departmentid;
+      params.departmentid = departmentid;
     }
+    console.log('\nMaking Athena API request with params:', params);
 
     const response = await axios({
       method: 'GET',
@@ -98,7 +98,9 @@ async function enhanceWaitlistWithAppointments(waitlistData, token, practiceId, 
             ),
             patientPhone: transformedAppointments[0]?.patientPhone || '+19194751339',
             providerName: transformedAppointments[0]?.providerName || 'Dr. Geoffrey Fox',
-            scheduleDateTimeString: parseDateTime(transformedAppointments[0]?.scheduleDateTimeString) || new Date().toISOString()
+            scheduleDateTimeString: transformedAppointments[0]?.scheduleddatetime
+              ? parseDateTime(transformedAppointments[0].scheduleddatetime)
+              : new Date().toISOString()
           };
           enhancedEntries.push(enhancedEntry);
         });

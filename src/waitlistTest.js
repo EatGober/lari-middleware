@@ -21,7 +21,6 @@ async function testWaitlistAPI() {
     // Construct query parameters
     const params = {};
     if (providerId) {
-      params.providerid = providerId;
       params.departmentid = departmentId;
     }
 
