@@ -8,7 +8,7 @@ interface CreateAppointmentParams {
 
 const createAppointment = async (practiceId: number, {patientId, slotId}: CreateAppointmentParams) => {
     const payload = querystring.stringify({
-        'reasonid': 1301,
+        'reasonid': 1281,
         'patientid': patientId,
     })
 
