@@ -8,11 +8,13 @@ interface CreatePatientParams {
 
 const createPatient = async (practiceId: number, { firstName, lastName}: CreatePatientParams): Promise<number> => {
     const payload = querystring.stringify({
-        email: 'test@test.com',
-        guarantoremail: 'test@test.com',
+        email: 'testf@test.com',
+        guarantoremail: 'testf@test.com',
         ssn: 123456789,
         departmentid: 1,
         dob: '01/01/1988',
+        contactmobilephone: '4052520616',
+        mobilephone: '4052520616',
         firstname: firstName,
         lastname: lastName,
     })

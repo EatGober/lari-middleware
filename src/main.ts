@@ -16,16 +16,16 @@ const main = async () => {
     // console.log({provider})
 
     const patient = await createPatient(195900, {
-        firstName: 'Albert',
-        lastName: 'Sheng',
+        firstName: 'Le',
+        lastName: 'Averick',
     })
 
     const slot = await createSlot(
         195900,
         {
-            providerId: 1,
+            providerId: 71,
             departmentId: 1,
-            date: add(new Date(), {days: 2})
+            date: add(new Date(), {days: 1})
         }
     )
 
