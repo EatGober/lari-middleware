@@ -60,9 +60,10 @@ router.get('/:practiceid', asyncHandler(async (req, res) => {
   const transformedAppointments = await Promise.all(
     await transformAppointments(appointments, practiceid, req.athenaToken)
   );
+  res.json(transformedAppointments);
 
-  const filteredAppts = filterNullNums(transformedAppointments)
-  res.json(filteredAppts);
+  // const filteredAppts = filterNullNums(transformedAppointments)
+  // res.json(filteredAppts);
 }));
 
 

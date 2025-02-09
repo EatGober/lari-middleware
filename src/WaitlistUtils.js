@@ -99,7 +99,7 @@ async function enhanceWaitlistWithAppointments(waitlistData, token, practiceId, 
             relatedAppointments: transformedAppointments.filter(appt =>
               appt.patientid === entry.patientid
             ),
-            patientPhone: transformedAppointments[0]?.patientPhone || '+19194751339',
+            patientPhone: '+1' + transformedAppointments[0]?.patientPhone || '+19194751339',
             providerName: transformedAppointments[0]?.providerName || 'Dr. Geoffrey Fox',
             scheduleDateTimeString: transformedAppointments[0]?.scheduleddatetime
               ? parseDateTime(transformedAppointments[0].scheduleddatetime)
