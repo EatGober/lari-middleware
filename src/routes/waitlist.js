@@ -17,7 +17,6 @@ router.get('/:practiceid', asyncHandler(async (req, res) => {
     const waitlistEntries = await getWaitlist(
       req.athenaToken,
       practiceid,
-      providerid ? providerid.toString() : undefined,
     departmentid ? departmentid.toString() : undefined
   );
     console.log('Waitlist Response from route:', waitlistEntries);
