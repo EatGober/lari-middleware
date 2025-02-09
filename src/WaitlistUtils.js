@@ -1,6 +1,6 @@
 const axios = require('axios');
 const { getBatchPatient } = require('./PatientUtils');
-const {transformAppointments, getAllAppointments} = require("./AppointUtils");
+const {transformAppointments, getAllAppointments,parseDateTime} = require("./AppointUtils");
 const _ = require('lodash');  // Add this import
 
 const getWaitlist = async (token, practiceid,departmentid) => {
@@ -97,7 +97,8 @@ async function enhanceWaitlistWithAppointments(waitlistData, token, practiceId, 
               appt.patientid === entry.patientid
             ),
             patientPhone: transformedAppointments[0]?.patientPhone || '+19194751339',
-            providerName: transformedAppointments[0]?.providerName || 'Dr. Geoffrey Fox'
+            providerName: transformedAppointments[0]?.providerName || 'Dr. Geoffrey Fox',
+            scheduleDateTimeString: parseDateTime(transformedAppointments[0]?.scheduleDateTimeString) || new Date().toISOString()
           };
           enhancedEntries.push(enhancedEntry);
         });

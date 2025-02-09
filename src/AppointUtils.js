@@ -408,4 +408,4 @@ const filterNullNums = (transformedAppt)=>{
 
 
 
-module.exports = { getAllAppointments, getAppointmentsByIds,  filterAppointmentsByDuration, getSubscriptions, subscribeToChanges, filterAppointmentsByEndTime, filterAppointmentsByStartTime, transformAppointments, cancelAppointment,filterNullNums };
+module.exports = { getAllAppointments, getAppointmentsByIds,parseDateTime,  filterAppointmentsByDuration, getSubscriptions, subscribeToChanges, filterAppointmentsByEndTime, filterAppointmentsByStartTime, transformAppointments, cancelAppointment,filterNullNums };
