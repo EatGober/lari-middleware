@@ -1,0 +1,35 @@
+import * as querystring from "node:querystring";
+import axios from "@/lib/axios";
+
+interface CreateSlotParams {
+    providerId: number
+    departmentId: number
+    reasonId: number
+    date: Date
+}
+
+const createSlot = async (practiceId: number, {providerId, departmentId, reasonId, date}: CreateSlotParams) => {
+    const appointmentdate = `${(date.getMonth() + 1).toString().padStart(2, '0')}/${date
+        .getDate()
+        .toString().padStart(2, '0')}/${date.getFullYear()}`;
+    // Format time as hh:mm (24-hour)
+    const appointmenttime = `${date.getHours().toString().padStart(2, '0')}:${date
+        .getMinutes()
+        .toString().padStart(2, '0')}`;
+
+    const payload = querystring.stringify({
+        'reasonid': reasonId,
+        'providerid': providerId,
+        'departmentid': departmentId,
+        // parse to mm/dd/yyyy
+        'appointmentdate': appointmentdate,
+        // parse to hh:mm (24-hour clock)
+        'appointmenttime': appointmenttime,
+    })
+
+    const { data } = await axios.post(`/v1/${practiceId}/appointments/open`, payload)
+
+    return data
+}
+
+export default createSlot
