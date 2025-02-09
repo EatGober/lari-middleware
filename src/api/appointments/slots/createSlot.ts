@@ -1,5 +1,6 @@
 import * as querystring from "node:querystring";
 import axios from "@/lib/axios";
+import {AppointmentSlot} from "@/types/appointment";
 
 interface CreateSlotParams {
     providerId: number
@@ -8,7 +9,12 @@ interface CreateSlotParams {
     date: Date
 }
 
-const createSlot = async (practiceId: number, {providerId, departmentId, reasonId, date}: CreateSlotParams) => {
+const createSlot = async (practiceId: number, {
+    providerId,
+    departmentId,
+    reasonId,
+    date
+}: CreateSlotParams): Promise<AppointmentSlot> => {
     const appointmentdate = `${(date.getMonth() + 1).toString().padStart(2, '0')}/${date
         .getDate()
         .toString().padStart(2, '0')}/${date.getFullYear()}`;
@@ -27,9 +33,13 @@ const createSlot = async (practiceId: number, {providerId, departmentId, reasonI
         'appointmenttime': appointmenttime,
     })
 
-    const { data } = await axios.post(`/v1/${practiceId}/appointments/open`, payload)
+    const {data} = await axios.post(`/v1/${practiceId}/appointments/open`, payload)
 
-    return data
+    // { appointmentids: { '1387803': '02:29' } }
+    return {
+        id: parseInt(Object.keys(data.appointmentids)[0]),
+        time: data.appointmentids[Object.keys(data.appointmentids)[0]]
+    }
 }
 
 export default createSlot
