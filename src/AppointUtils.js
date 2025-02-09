@@ -56,6 +56,52 @@ async function getAllAppointments(token, practiceid, startDate, endDate, provide
     throw error;
   }
 }
+/**
+ * Retrieves multiple appointments from athenahealth API by their appointment IDs.
+ *
+ * @async
+ * @param {string} token - The authentication token for API access
+ * @param {string|number} practiceid - The practice ID
+ * @param {Array<number>} appointmentIds - Array of appointment IDs to retrieve
+ *
+ * @returns {Promise<Array<Object>>} A promise that resolves to an array of appointment objects
+ *
+ * @throws {Error} If token, practiceid, or appointmentIds are missing
+ * @throws {Error} If the API request fails
+ *
+ */
+async function getAppointmentsByIds(token, practiceid, appointmentIds) {
+  // Input validation
+  if (!token || !practiceid || !appointmentIds || !appointmentIds.length) {
+    throw new Error('Token, practiceid, and at least one appointmentId are required');
+  }
+
+  try {
+    const response = await axios({
+      method: 'GET',
+      url: `https://api.preview.platform.athenahealth.com/v1/${practiceid}/appointments/booked/multiple`,
+      params: {
+        appointmentids: appointmentIds.join(',')
+      },
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/json'
+      }
+    });
+
+    return response.data.appointments || [];
+
+  } catch (error) {
+    console.error('Failed to retrieve appointments by IDs:', {
+      status: error.response?.status,
+      message: error.message
+    });
+    throw error;
+  }
+}
+
+
+
 
 /**
  * Converts mm/dd/yyyy hh24:mi:ss string to Date object
@@ -362,4 +408,4 @@ const filterNullNums = (transformedAppt)=>{
 
 
 
-module.exports = { getAllAppointments, filterAppointmentsByDuration, getSubscriptions, subscribeToChanges, filterAppointmentsByEndTime, filterAppointmentsByStartTime, transformAppointments, cancelAppointment,filterNullNums };
+module.exports = { getAllAppointments, getAppointmentsByIds,parseDateTime,  filterAppointmentsByDuration, getSubscriptions, subscribeToChanges, filterAppointmentsByEndTime, filterAppointmentsByStartTime, transformAppointments, cancelAppointment,filterNullNums };

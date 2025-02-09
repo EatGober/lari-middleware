@@ -3,7 +3,7 @@ const express = require('express');
 const router = express.Router();
 const { asyncHandler } = require('../middleware/error-handler');
 const { authMiddleware } = require('../middleware/auth');
-const { getWaitlist } = require('../WaitlistUtils');
+const { getWaitlist,enhanceWaitlistWithAppointments } = require('../WaitlistUtils');
 
 // Apply auth middleware to all waitlist routes
 router.use(authMiddleware);
@@ -19,15 +19,18 @@ router.get('/:practiceid', asyncHandler(async (req, res) => {
       practiceid,
       providerid ? providerid.toString() : undefined,
     departmentid ? departmentid.toString() : undefined
-
   );
+    console.log('Waitlist Response from route:', waitlistEntries);
 
-    console.log('Waitlist Response:', waitlistEntries); // Add this log
 
-    // The API might return the data in a different structure
-    // Maybe it's waitlistEntries.waitlist or waitlistEntries.items
+    const enhancedWaitlist = await enhanceWaitlistWithAppointments(
+      waitlistEntries,
+      req.athenaToken,
+      practiceid,
 
-    res.json(waitlistEntries);
+    );
+    console.log('Enhanced Waitlist:', enhancedWaitlist); // Add this log
+    res.json(enhancedWaitlist);
   } catch (error) {
     if (error.response?.status === 404) {
       res.status(404).json({ error: 'No waitlist found for the specified practice' });

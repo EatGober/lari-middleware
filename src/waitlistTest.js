@@ -10,18 +10,19 @@ async function testWaitlistAPI() {
 
     // Test parameters
     const practiceid = process.env.PRACTICE_ID || '195900';
-    const departmentId = 1;  // Add department ID
-
+    const providerId = 71;
+    const departmentId = 1;
     console.log('Waitlist API Test Configuration:');
     console.log('----------------------');
     console.log(`Base URL: ${baseURL}`);
     console.log(`Practice ID: ${practiceid}`);
-    console.log(`Department ID: ${departmentId}`);
+    if (providerId) console.log(`Provider ID: ${providerId}`);
 
     // Construct query parameters
-    const params = {
-      departmentid: departmentId
-    };
+    const params = {};
+    if (providerId) {
+      params.departmentid = departmentId;
+    }
 
     // Test waitlist fetch
     const testUrl = `${baseURL}/waitlist/${practiceid}`;
@@ -37,6 +38,7 @@ async function testWaitlistAPI() {
     if (response.data.length > 0) {
       console.log('\nSample waitlist entry:');
       console.log(JSON.stringify(response.data[0], null, 2));
+      // Write all waitlist entries to a JSON file
       fs.writeFileSync('waitlist.json', JSON.stringify(response.data, null, 2));
       console.log('\nAll waitlist entries have been written to waitlist.json');
     }
