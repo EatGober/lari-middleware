@@ -1,6 +1,7 @@
 const axios = require('axios');
 const { getBatchPatient } = require('./PatientUtils');
 const {transformAppointments, getAllAppointments} = require("./AppointUtils");
+const _ = require('lodash');  // Add this import
 
 const getWaitlist = async (token, practiceid,departmentid) => {
   if (!token || !practiceid) {
@@ -30,7 +31,7 @@ const getWaitlist = async (token, practiceid,departmentid) => {
     console.log('Waitlist response structure:', JSON.stringify(response.data, null, 2));
 
     // Return the waitlist array, similar to how appointments are handled
-    return response.data.waitlistentries || response.data.results || [];
+    return response.data.waitlistentries || [];
 
   } catch (error) {
     console.error('Failed to retrieve waitlist appts:', {
@@ -51,7 +52,7 @@ const getWaitlist = async (token, practiceid,departmentid) => {
  * @param {number} targetDepartmentId - Department ID to filter for
  * @returns {Promise<Array>} Enhanced waitlist entries for the specified department
  */
-async function enhanceWaitlistWithAppointments(waitlistData, token, practiceId, targetDepartmentId) {
+async function enhanceWaitlistWithAppointments(waitlistData, token, practiceId, targetDepartmentId=1) {
   if (!Array.isArray(waitlistData)) {
     throw new Error('waitlistData must be an array');
   }
@@ -117,5 +118,6 @@ async function enhanceWaitlistWithAppointments(waitlistData, token, practiceId, 
 
 
 module.exports = {
-  getWaitlist
+  getWaitlist,
+  enhanceWaitlistWithAppointments
 };
