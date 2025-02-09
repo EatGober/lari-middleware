@@ -5,31 +5,22 @@ const axios = require('axios');
 
 async function testWaitlistAPI() {
   try {
-    // API base URL
     const baseURL = process.env.API_URL || 'http://localhost:3000/api';
-
-    // Test parameters
     const practiceid = process.env.PRACTICE_ID || '195900';
     const providerId = 71;
     const departmentId = 1;
+
     console.log('Waitlist API Test Configuration:');
     console.log('----------------------');
     console.log(`Base URL: ${baseURL}`);
     console.log(`Practice ID: ${practiceid}`);
     if (providerId) console.log(`Provider ID: ${providerId}`);
 
-    // Construct query parameters
-    const params = {};
-    if (providerId) {
-      params.departmentid = departmentId;
-    }
-
-    // Test waitlist fetch
-    const testUrl = `${baseURL}/waitlist/${practiceid}`;
+    // Build the URL with path parameters instead of query parameters
+    const testUrl = `${baseURL}/waitlist/${practiceid}/${departmentId}/${providerId}`;
     console.log('\nMaking request to:', testUrl);
-    console.log('With params:', params);
 
-    const response = await axios.get(testUrl, { params });
+    const response = await axios.get(testUrl);
 
     console.log('\nResponse:');
     console.log(`Status: ${response.status}`);
@@ -38,7 +29,6 @@ async function testWaitlistAPI() {
     if (response.data.length > 0) {
       console.log('\nSample waitlist entry:');
       console.log(JSON.stringify(response.data[0], null, 2));
-      // Write all waitlist entries to a JSON file
       fs.writeFileSync('waitlist.json', JSON.stringify(response.data, null, 2));
       console.log('\nAll waitlist entries have been written to waitlist.json');
     }

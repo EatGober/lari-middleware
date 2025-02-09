@@ -3,7 +3,7 @@ const { getBatchPatient } = require('./PatientUtils');
 const {transformAppointments, getAllAppointments,parseDateTime} = require("./AppointUtils");
 const _ = require('lodash');  // Add this import
 
-const getWaitlist = async (token, practiceid,departmentid) => {
+const getWaitlist = async (token, practiceid,departmentid, providerid) => {
   if (!token || !practiceid) {
     throw new Error("token and practice id are required for getWaitlist");
   }
@@ -14,6 +14,9 @@ const getWaitlist = async (token, practiceid,departmentid) => {
 
     if (departmentid) {
       params.departmentid = departmentid;
+    }
+    if (providerid) {
+      params.providerid = providerid;
     }
     console.log('\nMaking Athena API request with params:', params);
 
