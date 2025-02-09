@@ -9,15 +9,15 @@ const { getWaitlist,enhanceWaitlistWithAppointments } = require('../WaitlistUtil
 router.use(authMiddleware);
 
 // Get waitlist entries with optional provider filtering
-router.get('/:practiceid', asyncHandler(async (req, res) => {
-  const { practiceid } = req.params;
-  const { providerid, departmentid } = req.query;
+router.get('/:practiceid/:departmentid/:providerid', asyncHandler(async (req, res) => {
+  const { practiceid, departmentid, providerid } = req.params;
 
   try {
     const waitlistEntries = await getWaitlist(
       req.athenaToken,
       practiceid,
-    departmentid ? departmentid.toString() : undefined
+    departmentid ? departmentid.toString() : undefined,
+      providerid ? providerid.toString() : undefined
   );
     console.log('Waitlist Response from route:', waitlistEntries);
 
